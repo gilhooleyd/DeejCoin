@@ -1,0 +1,8 @@
+*Stuff to get done
+** Admin
+*** TODO allow transactions to be inline
+** Features
+*** Passwords
+**** TODO add password support
+**** TODO add password encryption
+*** Views

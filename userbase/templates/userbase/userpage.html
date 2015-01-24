@@ -1,0 +1,31 @@
+<h1>{{ user.name}} </h1> <br>
+<h2> Level -- {{user.level}} </h2> <br>
+<h2> Coins -- {{user.coins}} </h2> <br>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'user/level'%}" method="post">
+  {% csrf_token %}
+  {% for choice in question.choice_set.all %}
+  <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+  <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+  {% endfor %}
+  <input type="submit" value="Vote" />
+  </form>
+
+Transactions <br>
+
+{% if latest_transaction_list %}
+<ul>
+  
+  {% for transaction in latest_transaction_list %}
+   {% if transaction.withdraw == 1%}
+    <li>  {{ transaction.userOther }} gave you : {{ transaction.amount }} DeejCoins  {{ transaction.date}}</li>
+   {% else %}
+    <li> You gave  {{ transaction.userThis.name }} : {{ transaction.amount }} DeejCoins</li>
+   {% endif %}
+  {% endfor %}
+</ul>
+{% else %}
+<p>No transactions yet :( </p>
+{% endif %}
