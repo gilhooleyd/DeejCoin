@@ -1,17 +1,9 @@
-<h1>{{ user.name}} </h1> <br>
-<h2> Level -- {{user.level}} </h2> <br>
-<h2> Coins -- {{user.coins}} </h2> <br>
+
+<h1>{{ user.username}} </h1> <br>
+<h2> Level -- {{user.person.level}} </h2> <br>
+<h2> Coins -- {{user.person.coins}} </h2> <br>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-<form action="{% url 'user/level'%}" method="post">
-  {% csrf_token %}
-  {% for choice in question.choice_set.all %}
-  <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
-  <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
-  {% endfor %}
-  <input type="submit" value="Vote" />
-  </form>
 
 Transactions <br>
 
@@ -19,11 +11,7 @@ Transactions <br>
 <ul>
   
   {% for transaction in latest_transaction_list %}
-   {% if transaction.withdraw == 1%}
-    <li>  {{ transaction.userOther }} gave you : {{ transaction.amount }} DeejCoins  {{ transaction.date}}</li>
-   {% else %}
-    <li> You gave  {{ transaction.userThis.name }} : {{ transaction.amount }} DeejCoins</li>
-   {% endif %}
+    <li>  {{ transaction.0 }} gave {{ transaction.1 }} {{ transaction.2 }} DeejCoins  {{ transaction.3 }}</li>
   {% endfor %}
 </ul>
 {% else %}

@@ -1,19 +1,16 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
-
-class User(models.Model):
-    name = models.CharField(max_length=50)
-    coins = models.IntegerField(default=0)
-    level = models.IntegerField(default=0)
-    def __str__(self):
-        return self.name
-
 class Transaction(models.Model):
-    userThis = models.ForeignKey(User)
-    userOther = models.CharField(max_length=50)
     amount = models.IntegerField(default=0)
-    withdraw = models.BooleanField()
     date = models.DateTimeField('date published')
     def __str__(self):
-        return self.userThis.name
+        return str(self.amount)
+class Person(models.Model):
+    user = models.OneToOneField(User)
+    coins = models.IntegerField(default=0)
+    level = models.IntegerField(default=0)
+    transactions = models.ManyToManyField(Transaction, blank=True)
+    def __str__(self):
+        return self.user.username
