@@ -13,10 +13,8 @@ def redirect_if_logged_in(request):
 
 def index(request):
     if request.user.is_authenticated():
-        print(request.user.username)
-        return HttpResponseRedirect(reverse('user', args=(request.user.username,)))
-    return HttpResponseRedirect(reverse('homepage'))
-
+        return HttpResponse("YAY LOGGED IN " + request.user.username)
+    return HttpResponse("Yo, its the homepage")
 
 def register(request):
     redirect_if_logged_in(request)
@@ -87,31 +85,50 @@ def user_logout(request):
     return HttpResponseRedirect(reverse('homepage'))
 
 def create_transaction(request, name):
-	# HTTP POST: Submit data
-	if request.method == 'POST':
-		form = TransactionForm(request.POST)
-		if form.is_valid():
-			transaction = form.save()
-			transaction.amount = request.POST['amount']
-			transaction.date = datetime.now()
-			transaction.save()
-			giver = User.objects.filter(username=name)[0]
-			giver = Person.objects.filter(user=giver)[0]
-			recipient = User.objects.filter(username=request.POST['recipient'])[0]
-			recipient = Person.objects.filter(user=recipient)[0]
-			giver.transactions.add(transaction)
-			recipient.transactions.add(transaction)
-                        redirect_if_logged_in(request)
-		else:
-			print form.errors
+    # HTTP POST: Submit data
+    if request.method == 'POST':
+        form = TransactionForm(request.POST)
+        if form.is_valid():
+
+            # Get the form data
+            transaction = form.save()
+            transaction.amount = int(request.POST['amount'])
+            transaction.date = datetime.now()
+            rec_name = request.POST['recipient']
+
+            # Get the giver and receiver person objects
+            giver = User.objects.filter(username=name)[0]
+            giver = Person.objects.filter(user=giver)[0]
+            recipient = User.objects.filter(username=rec_name)[0]
+            recipient = Person.objects.filter(user=recipient)[0]
+
+            # Ensure the transaction can be done
+            if (rec_name == name):
+                return HttpResponse("You can't give DeejCoins to yourself!")
+            if (transaction.amount > int(giver.coins)):
+                return HttpResponse("You're too poor for that!")
+
+            # Perform the coin manipulation
+            giver.coins -= int(transaction.amount)
+            recipient.coins += int(transaction.amount)
+
+            # Record the transaction
+            transaction.save()
+            giver.save()
+            recipient.save()
+            giver.transactions.add(transaction)
+            recipient.transactions.add(transaction)
+        else:
+            print form.errors
+
 	
-	# HTTP GET: Just get the form data
-	else:
-		form = TransactionForm()
+    # HTTP GET: Just get the form data
+    else:
+        form = TransactionForm()
 	
-	# Render the page
-	return render(request, 'userbase/create_transaction.html',
-			{'transaction_form': form})
+    # Render the page
+    return render(request, 'userbase/create_transaction.html',
+            {'transaction_form': form})
 
 def leaderboard(request):
     people = Person.objects.all().order_by('-coins')
