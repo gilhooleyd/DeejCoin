@@ -3,14 +3,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext, loader
 from userbase.models import Transaction, Person
 from django.contrib.auth.models import User
-from django.contrib.auth import login
+from django.contrib.auth import login, logout, authenticate
 from django.core.urlresolvers import reverse
 
 from userbase.forms import UserForm, LoginForm
 
 def index(request):
     if request.user.is_authenticated():
-        return HttpResponse("YAY LOGGED IN")
+        return HttpResponse("YAY LOGGED IN " + request.user.username)
     return HttpResponse("Yo, its the homepage")
 
 def register(request):
@@ -40,11 +40,16 @@ def register(request):
             'userbase/register.html',
             {'user_form': user_form, 'registered': registered})
 
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('index'))
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         login_form = LoginForm(data=request.POST)
+        user = authenticate(username=username, password=password)
         if login_form.is_valid():
             # Is the account active? It could have been disabled.
             if user.is_active:

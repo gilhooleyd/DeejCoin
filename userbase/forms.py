@@ -25,15 +25,15 @@ class UserForm(forms.ModelForm):
         else:
             return p
 
-class LoginForm(forms.ModelForm):
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=50)
     password = forms.CharField(widget=forms.PasswordInput())
-    class Meta:
-        model = User
-        fields = ('username', 'password')
-    def clean_username(self):
-        u = self.cleaned_data.get('username', '')
-        p = self.cleaned_data.get('password', '')
 
+    def clean(self):
+        cleaned_data = super(LoginForm, self).clean()
+        u = self.cleaned_data.get('username')
+        p = self.cleaned_data.get('password')
+        #print (u + "  " + p)
         if authenticate(username=u, password=p):
             return u
         else:
