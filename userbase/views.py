@@ -40,7 +40,10 @@ def register(request):
             {'user_form': user_form, 'registered': registered})
 
 def user(request, name):
-    user  = User.objects.filter(username=name)[0]
+    userlist = User.objects.filter(username=name)
+    if (len(userlist) < 1): 
+        return HttpResponse("There's nobody with that username!")
+    user = userlist[0]
     person = user.person
     latest_transaction_list = person.transactions.order_by('-date')[:5]
     context =  {
