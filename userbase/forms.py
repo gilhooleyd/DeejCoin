@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django import forms
+from models import Transaction
 
 
 class UserForm(forms.ModelForm):
@@ -38,3 +39,14 @@ class LoginForm(forms.Form):
             return u
         else:
             raise forms.ValidationError("Incorrect username or password")
+
+class TransactionForm(forms.ModelForm):
+	user_choices = []
+	for user in User.objects.all():
+		new_choice = (user.username, user.username)
+		user_choices.append(new_choice)
+	recipient = forms.ChoiceField(choices=user_choices)
+	
+	class Meta:
+		model = Transaction
+		fields = ('amount',)

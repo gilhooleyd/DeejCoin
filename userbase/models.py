@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
 
 # Create your models here.
 class Transaction(models.Model):
     amount = models.IntegerField(default=0)
-    date = models.DateTimeField('date published')
+    date = models.DateTimeField('date published', default=datetime.now)
     def __str__(self):
 		if (len(self.person_set.all()) != 2):
 			return str(self.amount)
