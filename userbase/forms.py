@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django import forms
 
 
@@ -24,3 +25,16 @@ class UserForm(forms.ModelForm):
         else:
             return p
 
+class LoginForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+    class Meta:
+        model = User
+        fields = ('username', 'password')
+    def clean_username(self):
+        u = self.cleaned_data.get('username', '')
+        p = self.cleaned_data.get('password', '')
+
+        if authenticate(username=u, password=p):
+            return u
+        else:
+            raise forms.ValidationError("Incorrect username or password")
