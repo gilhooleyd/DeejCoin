@@ -49,4 +49,4 @@ class TransactionForm(forms.ModelForm):
     amount = forms.IntegerField(min_value=1)
     class Meta:
         model = Transaction
-        fields = ('amount',)
+        fields = ('amount',)            

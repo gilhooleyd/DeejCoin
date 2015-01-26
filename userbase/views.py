@@ -8,16 +8,17 @@ from userbase.forms import UserForm, LoginForm, TransactionForm
 from datetime import datetime
 
 def redirect_if_logged_in(request):
-    if request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('user', args=(request.user.username,)))
+    return HttpResponseRedirect(reverse('user',
+                                            args=(request.user.username,)))
 
 def index(request):
     if request.user.is_authenticated():
-        return HttpResponse("YAY LOGGED IN " + request.user.username)
-    return HttpResponse("Yo, its the homepage")
+        return redirect_if_logged_in(request)
+    return HttpResponseRedirect(reverse('homepage'))
 
 def register(request):
-    redirect_if_logged_in(request)
+    if request.user.is_authenticated():
+        return redirect_if_logged_in(request)
     registered = False
     # If it's a HTTP POST, we're interested in processing form data.
     if request.method == 'POST':
@@ -60,7 +61,8 @@ def user(request, name):
     return render(request, 'userbase/userpage.html', context)
 
 def user_login(request):
-    redirect_if_logged_in(request)
+    if request.user.is_authenticated():
+        return redirect_if_logged_in(request)
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -86,6 +88,7 @@ def user_logout(request):
 
 def create_transaction(request, name):
     # HTTP POST: Submit data
+    error_msg = []
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
@@ -104,31 +107,32 @@ def create_transaction(request, name):
 
             # Ensure the transaction can be done
             if (rec_name == name):
-                return HttpResponse("You can't give DeejCoins to yourself!")
+                error_msg.append("You can't give DeejCoins to yourself!")
             if (transaction.amount > int(giver.coins)):
-                return HttpResponse("You're too poor for that!")
+                error_msg.append("You're too poor for that!")
 
-            # Perform the coin manipulation
-            giver.coins -= int(transaction.amount)
-            recipient.coins += int(transaction.amount)
+            if ( not error_msg):
+                # Perform the coin manipulation
+                giver.coins -= int(transaction.amount)
+                recipient.coins += int(transaction.amount)
 
-            # Record the transaction
-            transaction.save()
-            giver.save()
-            recipient.save()
-            giver.transactions.add(transaction)
-            recipient.transactions.add(transaction)
+                # Record the transaction
+                transaction.save()
+                giver.save()
+                recipient.save()
+                giver.transactions.add(transaction)
+                recipient.transactions.add(transaction)
+                return redirect_if_logged_in(request)
         else:
             print form.errors
 
-	
-    # HTTP GET: Just get the form data
-    else:
-        form = TransactionForm()
+    form = TransactionForm()
 	
     # Render the page
     return render(request, 'userbase/create_transaction.html',
-            {'transaction_form': form})
+                  {'transaction_form': form,
+                   'error_msg': error_msg,
+                   'active_user': request.user})
 
 def leaderboard(request):
     people = Person.objects.all().order_by('-coins')
