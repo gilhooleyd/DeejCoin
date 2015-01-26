@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.template import RequestContext, loader
-from userbase.models import Transaction, Person
+from django.template import RequestContext
 from django.contrib.auth.models import User
-
-from userbase.forms import UserForm
+from datetime import datetime
+from userbase.forms import UserForm, TransactionForm
+from userbase.models import Transaction, Person
 
 def index(request):
     return HttpResponse("Yo, its the homepage")
@@ -57,3 +57,30 @@ def user(request, name):
         'user': user,
         }
     return render(request, 'userbase/userpage.html', context)
+
+def create_transaction(request, name):
+	# HTTP POST: Submit data
+	if request.method == 'POST':
+		form = TransactionForm(request.POST)
+		if form.is_valid():
+			transaction = form.save()
+			transaction.amount = request.POST['amount']
+			transaction.date = datetime.now()
+			transaction.save()
+			giver = User.objects.filter(username=name)[0]
+			giver = Person.objects.filter(user=giver)[0]
+			recipient = User.objects.filter(username=request.POST['recipient'])[0]
+			recipient = Person.objects.filter(user=recipient)[0]
+			giver.transactions.add(transaction)
+			recipient.transactions.add(transaction)
+		else:
+			print form.errors
+	
+	# HTTP GET: Just get the form data
+	else:
+		form = TransactionForm()
+	
+	# Render the page
+	return render(request, 'userbase/create_transaction.html',
+			{'transaction_form': form})
+
