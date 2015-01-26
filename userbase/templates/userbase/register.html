@@ -1,3 +1,6 @@
+{% extends  "userbase/base.html" %}
+
+{% block content %}
 <h1>Create a user!</h1>
 
 {% if registered %}
@@ -17,3 +20,4 @@ Great! You registered! Go away!
   <input type="submit" name="submit" value="Register" />
 </form>
 {% endif %}
+{% endblock %}
