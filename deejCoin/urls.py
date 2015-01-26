@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from deejCoin.views import *
-
+from userbase import views
 
 urlpatterns = patterns('',
     # Examples:
@@ -13,4 +13,5 @@ urlpatterns = patterns('',
 #                       url(r'^logout/$', logout_page),
                        url(r'^admin/', include(admin.site.urls)),
                        url(r'^user/', include('userbase.urls')),
+                       url(r'^register/', views.register, name='register'),
 )
