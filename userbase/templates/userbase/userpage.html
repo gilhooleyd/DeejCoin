@@ -1,4 +1,5 @@
-
+{% extends  "userbase/base.html" %}
+{% block content %}
 <h1>{{ user.username }} </h1> <br>
 <h2> Level -- {{user.person.level}} </h2> <br>
 <h2> Coins -- {{user.person.coins}} </h2> <br>
@@ -17,3 +18,4 @@ Transactions <br>
 {% else %}
 <p>No transactions yet :( </p>
 {% endif %}
+{% endblock %}

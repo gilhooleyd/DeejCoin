@@ -1,53 +1,44 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import RequestContext
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
+from django.contrib.auth import login, logout, authenticate
+from django.core.urlresolvers import reverse
+from userbase.models import Person
+from userbase.forms import UserForm, LoginForm, TransactionForm
 from datetime import datetime
-from userbase.forms import UserForm, TransactionForm
-from userbase.models import Transaction, Person
 
 def index(request):
+    if request.user.is_authenticated():
+        return HttpResponse("YAY LOGGED IN " + request.user.username)
     return HttpResponse("Yo, its the homepage")
 
 def register(request):
-    # Like before, get the request's context.
-    context = RequestContext(request)
-
-    # A boolean value for telling the template whether the registration was successful.
-    # Set to False initially. Code changes value to True when registration succeeds.
     registered = False
 
     # If it's a HTTP POST, we're interested in processing form data.
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
-        if user_form.is_valid() and profile_form.is_valid():
+        if user_form.is_valid():
             # Save the user's form data to the database.
             user = user_form.save()
 
             # Now we hash the password with the set_password method.
             # Once hashed, we can update the user object.
             user.set_password(user.password)
+            person = Person(user=user)
+            person.save()
             user.save()
-
             registered = True
-
-        # Invalid form or forms - mistakes or something else?
-        # Print problems to the terminal.
-        # They'll also be shown to the user.
-        else:
-            print user_form.errors, profile_form.errors
 
     # Not a HTTP POST, so we render our form using two ModelForm instances.
     # These forms will be blank, ready for user input.
     else:
         user_form = UserForm()
-
-    # Render the template depending on the context.
-    return render_to_response(
-            'userbase/register.html',
-            {'user_form': user_form, 'registered': registered},
-            context)
     
+    return render(request,
+            'userbase/register.html',
+            {'user_form': user_form, 'registered': registered})
+
 def user(request, name):
     user  = User.objects.filter(username=name)[0]
     person = user.person
@@ -57,6 +48,30 @@ def user(request, name):
         'user': user,
         }
     return render(request, 'userbase/userpage.html', context)
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        login_form = LoginForm(data=request.POST)
+        user = authenticate(username=username, password=password)
+        if login_form.is_valid():
+            # Is the account active? It could have been disabled.
+            if user.is_active:
+                login(request, user)
+                return HttpResponseRedirect(reverse('index'))
+            else:
+                # An inactive account was used - no logging in!
+                return HttpResponse("Your account is disabled.")
+    else:
+        login_form = LoginForm()
+        
+    return render(request, 'userbase/login.html',
+                      {'login_form': login_form})
+        
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('index'))
 
 def create_transaction(request, name):
 	# HTTP POST: Submit data
