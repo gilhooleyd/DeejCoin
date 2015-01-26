@@ -7,6 +7,10 @@ from userbase.models import Person
 from userbase.forms import UserForm, LoginForm, TransactionForm
 from datetime import datetime
 
+def redirect_if_logged_in(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('user', args=(request.user.username,)))
+
 def index(request):
     if request.user.is_authenticated():
         print(request.user.username)
@@ -15,8 +19,8 @@ def index(request):
 
 
 def register(request):
+    redirect_if_logged_in(request)
     registered = False
-
     # If it's a HTTP POST, we're interested in processing form data.
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
@@ -31,7 +35,7 @@ def register(request):
             person.save()
             user.save()
             registered = True
-
+            login(request, user)
     # Not a HTTP POST, so we render our form using two ModelForm instances.
     # These forms will be blank, ready for user input.
     else:
@@ -47,14 +51,18 @@ def user(request, name):
         return HttpResponse("There's nobody with that username!")
     user = userlist[0]
     person = user.person
+    is_homepage = request.user.username == name
     latest_transaction_list = person.transactions.order_by('-date')[:5]
     context =  {
         'latest_transaction_list': latest_transaction_list,
         'user': user,
+        'active_user': request.user,
+        'is_homepage': is_homepage,
         }
     return render(request, 'userbase/userpage.html', context)
 
 def user_login(request):
+    redirect_if_logged_in(request)
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -76,7 +84,7 @@ def user_login(request):
         
 def user_logout(request):
     logout(request)
-    return HttpResponseRedirect(reverse('index'))
+    return HttpResponseRedirect(reverse('homepage'))
 
 def create_transaction(request, name):
 	# HTTP POST: Submit data
@@ -93,6 +101,7 @@ def create_transaction(request, name):
 			recipient = Person.objects.filter(user=recipient)[0]
 			giver.transactions.add(transaction)
 			recipient.transactions.add(transaction)
+                        redirect_if_logged_in(request)
 		else:
 			print form.errors
 	
@@ -104,3 +113,7 @@ def create_transaction(request, name):
 	return render(request, 'userbase/create_transaction.html',
 			{'transaction_form': form})
 
+def leaderboard(request):
+    people = Person.objects.all().order_by('-coins')
+    return render(request, 'userbase/leaderboard.html', {'people': people,
+                                                         'active_user': request.user})
