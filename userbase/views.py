@@ -10,8 +10,10 @@ from userbase.forms import UserForm, LoginForm
 
 def index(request):
     if request.user.is_authenticated():
-        return HttpResponse("YAY LOGGED IN " + request.user.username)
-    return HttpResponse("Yo, its the homepage")
+        print(request.user.username)
+        return HttpResponseRedirect(reverse('user', args=(request.user.username,)))
+    return HttpResponseRedirect(reverse('homepage'))
+
 
 def register(request):
     registered = False

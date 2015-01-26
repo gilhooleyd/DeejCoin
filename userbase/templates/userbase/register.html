@@ -5,6 +5,8 @@
 
 {% if registered %}
 Great! You registered! Go away!
+
+(We are just kidding, we love all of our users. Here, go to your <a href="{% url 'index' %}"> homepage instead ) </a>
 {% else %}
 
 <form id="user_form" method="post" action="/register/">
