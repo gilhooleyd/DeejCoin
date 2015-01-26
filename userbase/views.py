@@ -17,8 +17,6 @@ def index(request):
     return HttpResponseRedirect(reverse('homepage'))
 
 def register(request):
-    if request.user.is_authenticated():
-        return redirect_if_logged_in(request)
     registered = False
     # If it's a HTTP POST, we're interested in processing form data.
     if request.method == 'POST':
@@ -29,17 +27,23 @@ def register(request):
 
             # Now we hash the password with the set_password method.
             # Once hashed, we can update the user object.
+            p = user.password
             user.set_password(user.password)
             person = Person(user=user)
             person.save()
             user.save()
             registered = True
+            
+            user=authenticate(username=user.username, password=p)
             login(request, user)
     # Not a HTTP POST, so we render our form using two ModelForm instances.
     # These forms will be blank, ready for user input.
     else:
         user_form = UserForm()
-    
+        
+    if request.user.is_authenticated():
+        return redirect_if_logged_in(request)
+
     return render(request,
             'userbase/register.html',
             {'user_form': user_form, 'registered': registered})
