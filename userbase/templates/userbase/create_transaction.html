@@ -6,21 +6,24 @@
 
     <body>
         <h1>Here we go :p</h1>
-	{% if error_msg %}
-	<ul>
-	  {% for err in error_msg %}
-	  <li> {{ err }} </li>
-	  {% endfor %}
-	</ul>
-	{% endif %}
+	    
+        {% if error_msg %}
+	    <ul>
+	        {% for err in error_msg %}
+	            <li> {{ err }} </li>
+	        {% endfor %}
+	    </ul>
+	    {% endif %}
+        
         <form id="transaction_form" method="post" action="">
-
             {% csrf_token %}
 			{{ transaction_form.as_p }}
-
             <input type="submit" name="submit" value="Create Transaction!" />
         </form>
-	<a href=" {% url 'user' active_user.username %}"> Back to Homepage </a> <br>
+        
+        <br>
+	    <a href=" {% url 'user' active_user.username %}"> Back to Homepage </a> 
+        <br>
     </body>
 
 </html>
