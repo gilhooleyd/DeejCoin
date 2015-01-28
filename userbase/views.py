@@ -104,13 +104,13 @@ def create_transaction(request, name):
             rec_name = request.POST['recipient']
 
             # Get the giver and receiver person objects
-            giver = User.objects.filter(username=name)[0]
-            giver = Person.objects.filter(user=giver)[0]
+            giver = request.user
+            giver = giver.person
             recipient = User.objects.filter(username=rec_name)[0]
-            recipient = Person.objects.filter(user=recipient)[0]
+            recipient = recipient.person
 
             # Ensure the transaction can be done
-            if (rec_name == name):
+            if (giver.user.username == rec_name):
                 error_msg.append("You can't give DeejCoins to yourself!")
             if (transaction.amount > int(giver.coins)):
                 error_msg.append("You're too poor for that!")
