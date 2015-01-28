@@ -130,7 +130,7 @@ def create_transaction(request, name):
         else:
             print form.errors
 
-    form = TransactionForm()
+    form = TransactionForm(user=request.user)
 	
     # Render the page
     return render(request, 'userbase/create_transaction.html',

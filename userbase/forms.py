@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django import forms
-from models import Transaction, Person, IntegerRangeField
+from models import Transaction, Person
 
 
 class UserForm(forms.ModelForm):
@@ -31,10 +31,9 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput())
 
     def clean(self):
-        cleaned_data = super(LoginForm, self).clean()
+        super(LoginForm, self).clean()
         u = self.cleaned_data.get('username')
         p = self.cleaned_data.get('password')
-        #print (u + "  " + p)
         if authenticate(username=u, password=p):
             return u
         else:
@@ -43,13 +42,17 @@ class LoginForm(forms.Form):
 class TransactionForm(forms.ModelForm):
     # this method is needed to run EVERY form, otherwise choices are cached
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super(TransactionForm, self).__init__(*args, **kwargs)
         person_choices = []
-        for person in Person.objects.all():
+        for person in sorted(Person.objects.all()):
+            if user and user.username == person.user.username:
+                continue
             new_choice = (person.user.username, person.user.username)
             person_choices.append(new_choice)
-        self.fields['recipient'].choices = person_choices
-
+        # Sort choices by username
+        self.fields['recipient'].choices = \
+                sorted(person_choices, key=lambda x: x[1])
     recipient = forms.ChoiceField()
     amount = forms.IntegerField(min_value=1)
     class Meta:

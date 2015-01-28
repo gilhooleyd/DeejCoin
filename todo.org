@@ -8,7 +8,6 @@
 *** Views
 *** Leveling: Able to buy levels
 *** Transactions
-**** Sort recipients by Name
 **** Optional message with each transaction
 **** Remove logged in User from Recipient field
 *** Make error messages (such as NoUserFound) less ugly
