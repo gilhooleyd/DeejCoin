@@ -41,12 +41,17 @@ class LoginForm(forms.Form):
             raise forms.ValidationError("Incorrect username or password")
 
 class TransactionForm(forms.ModelForm):
-    person_choices = []
-    for person in Person.objects.all():
-        new_choice = (person.user.username, person.user.username)
-        person_choices.append(new_choice)
-    recipient = forms.ChoiceField(choices=person_choices)
+    # this method is needed to run EVERY form, otherwise choices are cached
+    def __init__(self, *args, **kwargs):
+        super(TransactionForm, self).__init__(*args, **kwargs)
+        person_choices = []
+        for person in Person.objects.all():
+            new_choice = (person.user.username, person.user.username)
+            person_choices.append(new_choice)
+        self.fields['recipient'].choices = person_choices
+
+    recipient = forms.ChoiceField()
     amount = forms.IntegerField(min_value=1)
     class Meta:
         model = Transaction
-        fields = ('amount',)
+        fields = ('amount',)            
