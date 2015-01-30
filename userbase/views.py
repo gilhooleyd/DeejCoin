@@ -100,6 +100,7 @@ def create_transaction(request, name):
             # Get the form data
             transaction = form.save()
             transaction.amount = int(request.POST['amount'])
+            transaction.message = request.POST['message']
             transaction.date = datetime.now()
             rec_name = request.POST['recipient']
 
@@ -115,7 +116,7 @@ def create_transaction(request, name):
             if (transaction.amount > int(giver.coins)):
                 error_msg.append("You're too poor for that!")
 
-            if ( not error_msg):
+            if (not error_msg):
                 # Perform the coin manipulation
                 giver.coins -= int(transaction.amount)
                 recipient.coins += int(transaction.amount)
