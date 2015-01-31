@@ -1,6 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
-from userbase.models import Transaction, Person
+from userbase.models import Transaction, Person, LevelUp
 # Register your models here.
 #class TransactionInLine(admin.StackedInLine):
 #    model = Transaction
@@ -16,3 +15,4 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(Person, UserAdmin)
 admin.site.register(Transaction)
+admin.site.register(LevelUp)

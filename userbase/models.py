@@ -5,14 +5,17 @@ from bounties.models import Bounty
 
 # Create your models here.
 class Transaction(models.Model):
-    amount = models.IntegerField(default=0)
+    amount = models.IntegerField(default=1)
     date = models.DateTimeField('date published', default=datetime.now)
+    message = models.CharField(default='', max_length=100)
     def __str__(self):
 		if (len(self.person_set.all()) != 2):
 			return str(self.amount)
 		trans_str =  self.person_set.all()[0].user.username + " => "
 		trans_str += self.person_set.all()[1].user.username + ": " 
 		trans_str += str(self.amount)
+		if (self.message):
+			trans_str += " | \"" + self.message + "\""
 		return trans_str
 
                 
@@ -24,13 +27,10 @@ class Person(models.Model):
     bounties = models.ManyToManyField(Bounty, blank=True)
     def __str__(self):
         return self.user.username
-    
-        
-class IntegerRangeField(models.IntegerField):
-    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
-        self.min_value, self.max_value = min_value, max_value
-        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
-    def formfield(self, **kwargs):
-        defaults = {'min_value': self.min_value, 'max_value':self.max_value}
-        defaults.update(kwargs)
-        return super(IntegerRangeField, self).formfield(**defaults)
+
+class LevelUp(models.Model):
+	level = models.IntegerField(default=0)
+	cost = models.IntegerField(default=0)
+	def __str__(self):
+		return str(self.level) + " - Cost: " + str(self.cost)
+
