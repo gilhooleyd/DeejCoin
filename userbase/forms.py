@@ -55,8 +55,8 @@ class TransactionForm(forms.ModelForm):
                 sorted(person_choices, key=lambda x: x[1])
     recipient = forms.ChoiceField()
     amount = forms.IntegerField(min_value=1)
-    # amount = forms.IntegerField(min_value=1)
-    message = forms.CharField(required=False, max_length=100)
+    message = forms.CharField(required=False, max_length=100,
+           widget=forms.TextInput(attrs={'size': '60'}))
     class Meta:
         model = Transaction
         fields = ('amount', )            

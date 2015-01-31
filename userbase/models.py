@@ -24,3 +24,9 @@ class Person(models.Model):
     transactions = models.ManyToManyField(Transaction, blank=True)
     def __str__(self):
         return self.user.username
+
+class LevelUp(models.Model):
+	level = models.IntegerField(default=0)
+	cost = models.IntegerField(default=0)
+	def __str__(self):
+		return str(self.level) + " - Cost: " + str(self.cost)

@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.core.urlresolvers import reverse
-from userbase.models import Person
+from userbase.models import Person, LevelUp
 from userbase.forms import UserForm, LoginForm, TransactionForm
 from datetime import datetime
 
@@ -56,12 +56,20 @@ def user(request, name):
     person = user.person
     is_homepage = request.user.username == name
     latest_transaction_list = person.transactions.order_by('-date')[:5]
-    context =  {
+    next_level = person.level + 1
+    levelup = LevelUp.objects.filter(level=next_level)
+    if (not levelup):
+        next_level_cost = -1
+    else:
+        next_level_cost = levelup[0].cost
+    context = {
         'latest_transaction_list': latest_transaction_list,
         'user': user,
         'active_user': request.user,
         'is_homepage': is_homepage,
-        }
+        'next_level': next_level,
+        'next_level_cost': next_level_cost
+    }
     return render(request, 'userbase/userpage.html', context)
 
 def user_login(request):
@@ -89,6 +97,40 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('homepage'))
+
+def level_up(request, name):
+    error_msg = []
+
+    # Get necessary information
+    person = request.user.person
+    next_level = person.level + 1
+    levelup = LevelUp.objects.filter(level=next_level)
+    if (not levelup):
+        return redirect_if_logged_in(request)
+    next_level_cost = levelup[0].cost
+
+    # HTTP POST: Update data
+    if request.method == 'POST':
+        
+        # Ensure the person has enough coins
+        if (person.coins < next_level_cost):
+            error_msg.append("You're too poor for that!")
+
+        if (not error_msg):
+            # Perform the level up
+            person.coins -= next_level_cost
+            person.level += 1
+            person.save()
+            return redirect_if_logged_in(request)
+    
+    context = {
+        'active_user': request.user,
+        'next_level': next_level,
+        'next_level_cost': next_level_cost,
+        'error_msg': error_msg
+    }
+    return render(request, 'userbase/level_up.html', context)
+
 
 def create_transaction(request, name):
     # HTTP POST: Submit data
@@ -140,6 +182,6 @@ def create_transaction(request, name):
                    'active_user': request.user})
 
 def leaderboard(request):
-    people = Person.objects.all().order_by('-coins')
+    people = Person.objects.all().order_by('-coins').order_by('-level')
     return render(request, 'userbase/leaderboard.html', {'people': people,
                                                          'active_user': request.user})

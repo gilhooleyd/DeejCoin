@@ -14,6 +14,13 @@ clean:
 run:
 	python manage.py runserver
 
+# Resets the database
+reset:
+	rm db.sqlite3
+	python manage.py makemigrations
+	python manage.py migrate
+	python manage.py createsuperuser
+
 # Performs database migrations
 migrate:
 	python manage.py makemigrations

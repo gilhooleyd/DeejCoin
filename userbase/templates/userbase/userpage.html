@@ -7,15 +7,25 @@
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 {% if is_homepage %}
-
 <a href=" {% url 'transaction' user.username %}"> Make a transaction </a> <br>
 <a href=" {% url 'leaderboard' %}"> View the glorious Leaderboard </a> <br>
 <a href=" {% url 'logout' %}"> Logout </a> <br>
+
+  {% if next_level_cost != -1 %}
+  <p>
+    Coins to purchase <a href=" {% url 'level_up' user.username %}">
+        Level {{ next_level }}</a>
+    &nbsp;&nbsp; <strong>{{ next_level_cost }}</strong>
+  </p>
+  {% else %}
+  <p>Woah! You can't buy anymore levels!</p>
+  {% endif %}
 
 {% elif active_user.is_authenticated %}
 <a href=" {% url 'leaderboard' %}"> Back to the glorious Leaderboard </a> <br>
 <a href=" {% url 'user' active_user.username %}"> Back to Homepage </a> <br>
 <a href=" {% url 'logout' %}"> Logout </a> <br>
+
 {% endif %}
 
 <br>Transactions: <br>
