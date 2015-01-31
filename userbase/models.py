@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
-from bounties.models import Bounty
+#from bounties.models import Bounty
 
 # Create your models here.
 class Transaction(models.Model):
@@ -24,7 +24,7 @@ class Person(models.Model):
     coins = models.IntegerField(default=0)
     level = models.IntegerField(default=0)
     transactions = models.ManyToManyField(Transaction, blank=True)
-    bounties = models.ManyToManyField(Bounty, blank=True)
+    #   bounties = models.ManyToManyField(Bounty, blank=True)
     def __str__(self):
         return self.user.username
 
