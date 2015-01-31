@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from bounties.models import Bounty
 
 # Create your models here.
 class Transaction(models.Model):
@@ -14,14 +15,17 @@ class Transaction(models.Model):
 		trans_str += str(self.amount)
 		return trans_str
 
+                
 class Person(models.Model):
     user = models.OneToOneField(User)
     coins = models.IntegerField(default=0)
     level = models.IntegerField(default=0)
     transactions = models.ManyToManyField(Transaction, blank=True)
+    bounties = models.ManyToManyField(Bounty, blank=True)
     def __str__(self):
         return self.user.username
-
+    
+        
 class IntegerRangeField(models.IntegerField):
     def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
         self.min_value, self.max_value = min_value, max_value
